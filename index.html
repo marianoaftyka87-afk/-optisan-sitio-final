@@ -1237,6 +1237,43 @@ html{scroll-behavior:smooth}
 }
 </style>
 
+
+<style id="promociones-css">
+.promos-section{margin:24px 0 30px}
+.promos-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:13px}
+.promos-head h2{font-family:Georgia,serif;font-weight:500;font-size:30px;margin:0}
+.promos-head p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.promos-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.promo-card{background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow-soft);display:flex;flex-direction:column}
+.promo-image{aspect-ratio:16/9;background:#f3efeb;overflow:hidden}
+.promo-image img{width:100%;height:100%;object-fit:cover}
+.promo-body{padding:17px}
+.promo-badge{display:inline-flex;width:max-content;padding:5px 9px;border-radius:999px;background:#f2e8dc;color:#7b5738;font-size:10px;font-weight:900}
+.promo-body h3{font-family:Georgia,serif;font-size:22px;font-weight:500;margin:9px 0 5px}
+.promo-body p{color:var(--muted);font-size:13px;line-height:1.45;margin:0 0 10px}
+.promo-price{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.promo-old{text-decoration:line-through;color:#9b918a;font-size:13px}
+.promo-new{font-size:24px;font-weight:900}
+.promo-valid{margin-top:9px;font-size:10px;color:#8a7d74}
+.avellaneda-mode .promo-badge{background:#e5f3fa;color:#165a86}
+.avellaneda-mode .promo-card{border-color:#d8e4ea}
+.avellaneda-mode .promo-new{color:#165a86}
+.admin-section-tabs{display:flex;gap:8px;padding:14px 16px 0;flex-wrap:wrap}
+.admin-section-tab{border:1px solid var(--line);background:#fff;color:#4d4037;border-radius:999px;padding:9px 14px;font-weight:800;font-size:12px;cursor:pointer}
+.admin-section-tab.active{background:#211914;color:#fff;border-color:#211914}
+.admin-subpanel{display:none}
+.admin-subpanel.active{display:block}
+.promo-admin-list{display:grid;gap:9px;margin-top:12px;max-height:520px;overflow:auto}
+.promo-admin-item{border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px;display:grid;grid-template-columns:70px 1fr auto;gap:10px;align-items:center;cursor:pointer;text-align:left}
+.promo-admin-item img{width:70px;height:52px;object-fit:cover;border-radius:8px;background:#f3efeb}
+.promo-admin-item strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.promo-admin-item small{display:block;color:var(--muted);margin-top:3px}
+.promo-admin-item .promo-status{font-size:10px;font-weight:900;border-radius:999px;padding:5px 8px;background:#eaf7ef;color:#167044}
+.promo-admin-item .promo-status.off{background:#fff0ed;color:#b42318}
+@media(max-width:900px){.promos-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.promos-grid{grid-template-columns:1fr}.promo-card{border-radius:18px}.promo-body{padding:14px}.admin-section-tabs{overflow:auto;flex-wrap:nowrap}.admin-section-tab{white-space:nowrap}.promo-admin-item{grid-template-columns:58px 1fr}.promo-admin-item img{width:58px;height:46px}.promo-admin-item .promo-status{grid-column:2}}
+</style>
+
 </head>
 <body class="selector-open">
 
@@ -1475,7 +1512,18 @@ html{scroll-behavior:smooth}
     <div id="featuredGrid" class="featured-grid"></div>
   </section>
 
-  <section class="catalog-head catalog-only">
+  
+<section id="promocionesSection" class="promos-section hidden">
+  <div class="promos-head">
+    <div>
+      <h2>🔥 Promociones</h2>
+      <p id="promocionesSubtitle">Ofertas vigentes de la sucursal.</p>
+    </div>
+  </div>
+  <div id="promocionesGrid" class="promos-grid"></div>
+</section>
+
+<section class="catalog-head catalog-only">
     <div>
       <h2>Modelos disponibles</h2>
       <p id="resultCount"></p>
@@ -2039,6 +2087,12 @@ window.addEventListener('optica:changed',()=>{
       </div>
     </div>
 
+    <div class="admin-section-tabs">
+      <button type="button" class="admin-section-tab active" data-admin-tab="productos">👓 Productos</button>
+      <button type="button" class="admin-section-tab" data-admin-tab="promociones">🔥 Promociones</button>
+    </div>
+
+    <div class="admin-subpanel active" id="adminProductosPanel">
     <div class="admin-layout">
       <aside>
         <div id="adminStats" class="admin-stats">
@@ -2118,6 +2172,67 @@ window.addEventListener('optica:changed',()=>{
         </div>
         <div id="adminStatus" class="helper" style="margin-top:12px;min-height:20px;"></div>
       </section>
+    </div>
+    </div>
+
+    <div class="admin-subpanel" id="adminPromocionesPanel">
+      <div class="admin-layout">
+        <aside>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input id="adminPromoSearch" type="search" placeholder="Buscar promoción..." style="flex:1;min-width:0;padding:10px 11px;border:1px solid var(--line);border-radius:10px;">
+            <button id="adminRefreshPromos" class="btn secondary" type="button" title="Actualizar">↻</button>
+          </div>
+          <div id="adminPromos" class="promo-admin-list"><div class="helper">Cargando promociones...</div></div>
+        </aside>
+        <section class="form-panel">
+          <h3 id="adminPromoFormTitle" style="margin-top:0;">➕ Agregar promoción</h3>
+          <input type="hidden" id="adminPromoId">
+          <div class="form-grid">
+            <label>Título
+              <input id="adminPromoTitulo" type="text" placeholder="Ej.: Anteojo receta + filtro azul">
+            </label>
+            <label>Precio promocional
+              <input id="adminPromoPrecio" type="number" min="0" step="1" placeholder="90000">
+            </label>
+            <label>Precio anterior
+              <input id="adminPromoPrecioAnterior" type="number" min="0" step="1" placeholder="130000">
+            </label>
+            <label>Orden
+              <input id="adminPromoOrden" type="number" step="1" value="0">
+            </label>
+            <label class="wide">Descripción
+              <textarea id="adminPromoDescripcion" rows="4" placeholder="Detalle de la promoción, cuotas, condiciones, etc."></textarea>
+            </label>
+            <label>Desde
+              <input id="adminPromoInicio" type="date">
+            </label>
+            <label>Hasta
+              <input id="adminPromoFin" type="date">
+            </label>
+            <label class="wide">Imagen de la promoción
+              <input id="adminPromoFotoFile" type="file" accept="image/jpeg,image/png,image/webp">
+              <small>JPG, PNG o WEBP. También podés usar una URL.</small>
+            </label>
+            <label class="wide">URL de imagen
+              <input id="adminPromoImagenUrl" type="url" placeholder="Se completa al subir una imagen">
+            </label>
+            <div class="wide preview-wrap" id="adminPromoPreviewWrap" style="display:none;">
+              <img id="adminPromoPreview" class="image-preview" alt="Vista previa de promoción">
+              <div class="helper" id="adminPromoPreviewHint"></div>
+            </div>
+            <label class="wide" style="display:flex;align-items:center;gap:8px;font-weight:700;">
+              <input id="adminPromoActivo" type="checkbox" checked> Mostrar promoción públicamente
+            </label>
+          </div>
+          <div class="form-actions">
+            <button id="adminPromoSave" class="btn primary" type="button">💾 Guardar promoción</button>
+            <span></span>
+            <button id="adminPromoCancel" class="btn secondary hidden" type="button">Cancelar edición</button>
+            <button id="adminPromoDelete" class="btn danger hidden" type="button">🗑️ Eliminar</button>
+          </div>
+          <div id="adminPromoStatus" class="helper" style="margin-top:12px;min-height:20px;"></div>
+        </section>
+      </div>
     </div>
   </div>
 </div>
@@ -2681,6 +2796,183 @@ window.addEventListener('optica:changed',()=>{
       else if(!$('adminPanel').classList.contains('hidden')) closeAdminPanel();
     }
   });
+
+  let adminPromosCache=[];
+  let adminPromoSelectedPhotoFile=null;
+
+  function currentPromoOptica(){
+    return localStorage.getItem('optica_seguimiento_seleccionada')==='AVELLANEDA'?'AVELLANEDA':'OPTISAN';
+  }
+  function promoStorageFolder(){
+    return currentPromoOptica()==='AVELLANEDA'?'promociones/avellaneda':'promociones/optisan';
+  }
+  function setAdminPromoStatus(message,kind=''){
+    const el=$('adminPromoStatus');
+    if(!el) return;
+    el.textContent=message||'';
+    el.style.color=kind==='error'?'#b42318':kind==='ok'?'#167044':'#766f69';
+  }
+  function resetAdminPromoForm(){
+    $('adminPromoId').value='';
+    $('adminPromoTitulo').value='';
+    $('adminPromoPrecio').value='';
+    $('adminPromoPrecioAnterior').value='';
+    $('adminPromoDescripcion').value='';
+    $('adminPromoInicio').value='';
+    $('adminPromoFin').value='';
+    $('adminPromoOrden').value='0';
+    $('adminPromoImagenUrl').value='';
+    $('adminPromoFotoFile').value='';
+    $('adminPromoActivo').checked=true;
+    adminPromoSelectedPhotoFile=null;
+    $('adminPromoFormTitle').textContent='➕ Agregar promoción';
+    $('adminPromoCancel').classList.add('hidden');
+    $('adminPromoDelete').classList.add('hidden');
+    updateAdminPromoPreview('');
+    setAdminPromoStatus('');
+  }
+  function updateAdminPromoPreview(src,hint=''){
+    const wrap=$('adminPromoPreviewWrap'), img=$('adminPromoPreview');
+    if(!src){wrap.style.display='none';img.removeAttribute('src');$('adminPromoPreviewHint').textContent='';return;}
+    img.src=src; wrap.style.display='block'; $('adminPromoPreviewHint').textContent=hint;
+  }
+  function startEditAdminPromo(p){
+    $('adminPromoId').value=p.id;
+    $('adminPromoTitulo').value=p.titulo||'';
+    $('adminPromoPrecio').value=p.precio_promocional??'';
+    $('adminPromoPrecioAnterior').value=p.precio_anterior??'';
+    $('adminPromoDescripcion').value=p.descripcion||'';
+    $('adminPromoInicio').value=p.fecha_inicio||'';
+    $('adminPromoFin').value=p.fecha_fin||'';
+    $('adminPromoOrden').value=p.orden??0;
+    $('adminPromoImagenUrl').value=p.imagen_url||'';
+    $('adminPromoActivo').checked=p.activo!==false;
+    $('adminPromoFotoFile').value='';
+    adminPromoSelectedPhotoFile=null;
+    updateAdminPromoPreview(p.imagen_url||'',p.imagen_url?'Imagen actual de la promoción':'');
+    $('adminPromoFormTitle').textContent='✏️ Editar promoción';
+    $('adminPromoCancel').classList.remove('hidden');
+    $('adminPromoDelete').classList.remove('hidden');
+    setAdminPromoStatus(`Editando: ${p.titulo||'promoción'}`);
+  }
+  function renderAdminPromos(){
+    const cont=$('adminPromos'), q=($('adminPromoSearch').value||'').toLowerCase().trim();
+    const list=adminPromosCache.filter(p=>!q||`${p.titulo||''} ${p.descripcion||''}`.toLowerCase().includes(q));
+    if(!list.length){cont.innerHTML='<div class="helper" style="padding:12px;">No hay promociones cargadas.</div>';return;}
+    cont.innerHTML=list.map(p=>`
+      <button type="button" class="promo-admin-item" data-promo-id="${p.id}">
+        <img src="${esc(p.imagen_url||fallback)}" alt="">
+        <span style="min-width:0"><strong>${esc(p.titulo||'Sin título')}</strong><small>${p.precio_promocional?money(p.precio_promocional):'Sin precio'} · Orden ${p.orden??0}</small></span>
+        <span class="promo-status ${p.activo===false?'off':''}">${p.activo===false?'Oculta':'Visible'}</span>
+      </button>`).join('');
+    cont.querySelectorAll('[data-promo-id]').forEach(btn=>btn.onclick=()=>{
+      const p=adminPromosCache.find(x=>String(x.id)===String(btn.dataset.promoId));
+      if(p) startEditAdminPromo(p);
+    });
+  }
+  async function loadAdminPromos(){
+    $('adminPromos').innerHTML='<div class="helper" style="padding:12px;">Cargando promociones...</div>';
+    try{
+      adminPromosCache=await adminRequest(`promociones?select=*&optica=eq.${encodeURIComponent(currentPromoOptica())}&order=orden.asc,created_at.desc`)||[];
+      renderAdminPromos();
+    }catch(err){
+      $('adminPromos').innerHTML=`<div class="catalog-error"><strong>No se pudieron cargar las promociones.</strong><span>${esc(err.message)}</span></div>`;
+    }
+  }
+  async function uploadAdminPromoPhoto(file){
+    const c=adminConfig(), token=adminToken();
+    if(!token) throw new Error('La sesión de administrador no está iniciada.');
+    if(!file) return null;
+    if(!['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('La imagen debe ser JPG, PNG o WEBP.');
+    if(file.size>8*1024*1024) throw new Error('La imagen es demasiado grande. Elegí una de menos de 8 MB.');
+    const objectPath=`${promoStorageFolder()}/${safeFileName(file.name)}`;
+    const response=await fetch(`${c.SUPABASE_URL}/storage/v1/object/productos/${objectPath}`,{
+      method:'POST',
+      headers:{'apikey':c.SUPABASE_PUBLISHABLE_KEY,'Authorization':`Bearer ${token}`,'Content-Type':file.type,'x-upsert':'false'},
+      body:file
+    });
+    if(!response.ok){
+      let detail=''; try{const d=await response.json();detail=d.message||d.error||JSON.stringify(d);}catch(_){detail=await response.text();}
+      throw new Error(detail||`No se pudo subir la imagen (Error ${response.status}).`);
+    }
+    return `${c.SUPABASE_URL}/storage/v1/object/public/productos/${objectPath}`;
+  }
+  async function saveAdminPromo(){
+    const titulo=$('adminPromoTitulo').value.trim();
+    if(!titulo){setAdminPromoStatus('Escribí el título de la promoción.','error');$('adminPromoTitulo').focus();return;}
+    let imagenUrl=$('adminPromoImagenUrl').value.trim()||null;
+    const payload={
+      optica:currentPromoOptica(),
+      titulo,
+      descripcion:$('adminPromoDescripcion').value.trim()||null,
+      precio_anterior:$('adminPromoPrecioAnterior').value===''?null:Number($('adminPromoPrecioAnterior').value),
+      precio_promocional:$('adminPromoPrecio').value===''?null:Number($('adminPromoPrecio').value),
+      imagen_url:imagenUrl,
+      fecha_inicio:$('adminPromoInicio').value||null,
+      fecha_fin:$('adminPromoFin').value||null,
+      activo:$('adminPromoActivo').checked,
+      orden:Number($('adminPromoOrden').value||0)
+    };
+    const id=$('adminPromoId').value, btn=$('adminPromoSave');
+    btn.disabled=true; setAdminPromoStatus(adminPromoSelectedPhotoFile?'Subiendo imagen...':(id?'Actualizando...':'Guardando...'));
+    try{
+      if(adminPromoSelectedPhotoFile){
+        imagenUrl=await uploadAdminPromoPhoto(adminPromoSelectedPhotoFile);
+        payload.imagen_url=imagenUrl;
+        $('adminPromoImagenUrl').value=imagenUrl;
+        updateAdminPromoPreview(imagenUrl,'Imagen subida correctamente');
+      }
+      if(id){
+        delete payload.optica;
+        await adminRequest(`promociones?id=eq.${encodeURIComponent(id)}`,{method:'PATCH',headers:{'Prefer':'return=representation'},body:JSON.stringify(payload)});
+        setAdminPromoStatus('Promoción actualizada correctamente.','ok');
+      }else{
+        await adminRequest('promociones',{method:'POST',headers:{'Prefer':'return=representation'},body:JSON.stringify(payload)});
+        setAdminPromoStatus('Promoción agregada correctamente.','ok');
+      }
+      await loadAdminPromos();
+      await loadPublicPromociones();
+      resetAdminPromoForm();
+    }catch(err){setAdminPromoStatus(err.message,'error');}
+    finally{btn.disabled=false;}
+  }
+  async function deleteAdminPromo(){
+    const id=$('adminPromoId').value; if(!id)return;
+    const p=adminPromosCache.find(x=>String(x.id)===String(id));
+    if(!confirm(`¿Eliminar definitivamente "${p?.titulo||'esta promoción'}"?`))return;
+    const btn=$('adminPromoDelete'); btn.disabled=true; setAdminPromoStatus('Eliminando...');
+    try{
+      await adminRequest(`promociones?id=eq.${encodeURIComponent(id)}`,{method:'DELETE'});
+      resetAdminPromoForm(); await loadAdminPromos(); await loadPublicPromociones();
+    }catch(err){setAdminPromoStatus(err.message,'error');}
+    finally{btn.disabled=false;}
+  }
+
+  document.querySelectorAll('[data-admin-tab]').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      document.querySelectorAll('[data-admin-tab]').forEach(x=>x.classList.toggle('active',x===tab));
+      const isPromo=tab.dataset.adminTab==='promociones';
+      $('adminProductosPanel').classList.toggle('active',!isPromo);
+      $('adminPromocionesPanel').classList.toggle('active',isPromo);
+      if(isPromo) loadAdminPromos();
+    });
+  });
+  $('adminPromoSave').addEventListener('click',saveAdminPromo);
+  $('adminPromoCancel').addEventListener('click',resetAdminPromoForm);
+  $('adminPromoDelete').addEventListener('click',deleteAdminPromo);
+  $('adminRefreshPromos').addEventListener('click',loadAdminPromos);
+  $('adminPromoSearch').addEventListener('input',renderAdminPromos);
+  $('adminPromoFotoFile').addEventListener('change',()=>{
+    const file=$('adminPromoFotoFile').files?.[0]||null;
+    adminPromoSelectedPhotoFile=file;
+    if(!file){updateAdminPromoPreview($('adminPromoImagenUrl').value.trim(),'');return;}
+    if(!file.type.startsWith('image/')){setAdminPromoStatus('Elegí un archivo de imagen válido.','error');adminPromoSelectedPhotoFile=null;return;}
+    updateAdminPromoPreview(URL.createObjectURL(file),`Nueva imagen seleccionada: ${file.name}`);
+    setAdminPromoStatus('Imagen lista. Se subirá cuando guardes la promoción.');
+  });
+  $('adminPromoImagenUrl').addEventListener('input',()=>{
+    if(!adminPromoSelectedPhotoFile) updateAdminPromoPreview($('adminPromoImagenUrl').value.trim(),'');
+  });
 })();
 </script>
 
@@ -2891,5 +3183,55 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+<script>
+/* ===== PROMOCIONES PÚBLICAS · SEPARADAS POR SUCURSAL ===== */
+(function(){
+  const $=id=>document.getElementById(id);
+  function promoOptica(){return localStorage.getItem('optica_seguimiento_seleccionada')==='AVELLANEDA'?'AVELLANEDA':'OPTISAN';}
+  function moneyPromo(v){return v==null||v===''?'':new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(Number(v));}
+  function escPromo(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+  function promoDate(d){if(!d)return '';const a=d.split('-');return a.length===3?`${a[2]}/${a[1]}/${a[0]}`:d;}
+  async function loadPublicPromociones(){
+    const section=$('promocionesSection'), grid=$('promocionesGrid');
+    if(!section||!grid)return;
+    const c=window.OPTISAN_CONFIG||{}, optica=promoOptica();
+    if(!c.SUPABASE_URL||!c.SUPABASE_PUBLISHABLE_KEY){section.classList.add('hidden');return;}
+    try{
+      const url=`${c.SUPABASE_URL}/rest/v1/promociones?select=*&optica=eq.${encodeURIComponent(optica)}&activo=eq.true&order=orden.asc,created_at.desc`;
+      const response=await fetch(url,{cache:'no-store',headers:{apikey:c.SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${c.SUPABASE_PUBLISHABLE_KEY}`}});
+      if(!response.ok) throw new Error(`Error ${response.status}`);
+      const data=await response.json();
+      const now=new Date(); now.setHours(0,0,0,0);
+      const valid=(Array.isArray(data)?data:[]).filter(p=>{
+        const ini=p.fecha_inicio?new Date(p.fecha_inicio+'T00:00:00'):null;
+        const fin=p.fecha_fin?new Date(p.fecha_fin+'T23:59:59'):null;
+        return (!ini||now>=ini)&&(!fin||now<=fin);
+      });
+      if(!valid.length){section.classList.add('hidden');return;}
+      grid.innerHTML=valid.map(p=>`
+        <article class="promo-card">
+          <div class="promo-image">${p.imagen_url?`<img src="${escPromo(p.imagen_url)}" alt="${escPromo(p.titulo||'Promoción')}">`:'<div style="height:100%;display:grid;place-items:center;font-size:42px;">🔥</div>'}</div>
+          <div class="promo-body">
+            <span class="promo-badge">PROMOCIÓN</span>
+            <h3>${escPromo(p.titulo||'Promoción')}</h3>
+            ${p.descripcion?`<p>${escPromo(p.descripcion)}</p>`:''}
+            ${(p.precio_promocional!=null||p.precio_anterior!=null)?`<div class="promo-price">${p.precio_anterior!=null?`<span class="promo-old">${moneyPromo(p.precio_anterior)}</span>`:''}${p.precio_promocional!=null?`<span class="promo-new">${moneyPromo(p.precio_promocional)}</span>`:''}</div>`:''}
+            ${(p.fecha_inicio||p.fecha_fin)?`<div class="promo-valid">Vigencia: ${promoDate(p.fecha_inicio)||'—'}${p.fecha_fin?' al '+promoDate(p.fecha_fin):''}</div>`:''}
+          </div>
+        </article>`).join('');
+      $('promocionesSubtitle').textContent=optica==='AVELLANEDA'?'Ofertas vigentes de Óptica Avellaneda.':'Ofertas vigentes de OPTISAN.';
+      section.classList.remove('hidden');
+    }catch(err){
+      console.error('Promociones:',err);
+      section.classList.add('hidden');
+    }
+  }
+  window.loadPublicPromociones=loadPublicPromociones;
+  window.addEventListener('optica:changed',()=>setTimeout(loadPublicPromociones,0));
+  document.addEventListener('DOMContentLoaded',loadPublicPromociones);
+})();
+</script>
+
 </body>
 </html>
